@@ -9,7 +9,6 @@ import androidx.lifecycle.AndroidViewModel
 class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
-        // App start hote hi automatically log all user apps
         logAllUserApps()
     }
 
@@ -21,7 +20,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             val packageName = app.packageName
             val appName = pm.getApplicationLabel(app).toString()
 
-            // ✅ Only user apps
+
             val isUserApp = (app.flags and ApplicationInfo.FLAG_SYSTEM) == 0
             val isNotGoogleOrAndroid = !packageName.startsWith("com.android") &&
                     !packageName.startsWith("com.google")
