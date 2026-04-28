@@ -3,22 +3,22 @@ package com.ibexia.appauditor
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.viewModels
+import com.ibexia.appauditor.ui.screens.AppAuditorRoot
+import com.ibexia.appauditor.ui.theme.AppAuditorTheme
 import com.ibexia.appauditor.viewmodel.AppViewModel
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var viewModel: AppViewModel
+    private val viewModel: AppViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = ViewModelProvider(this)[AppViewModel::class.java]
-
-       // viewModel.getUserInstalledApps()
-
         setContent {
-
+            AppAuditorTheme {
+                AppAuditorRoot(viewModel = viewModel)
+            }
         }
     }
 }
