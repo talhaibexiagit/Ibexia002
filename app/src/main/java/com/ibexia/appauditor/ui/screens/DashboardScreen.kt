@@ -35,7 +35,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.statusBarsPadding
-
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 
 @Composable
 fun DashboardScreen(viewModel: AppViewModel) {
