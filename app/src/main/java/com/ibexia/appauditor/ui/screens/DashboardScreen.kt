@@ -142,7 +142,10 @@
 
 package com.ibexia.appauditor.ui.screens
 
+import android.app.Activity
 import android.content.pm.PackageManager
+import com.ibexia.appauditor.ads.AdMobManager
+import com.ibexia.appauditor.ads.BannerAdView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -368,38 +371,64 @@ fun DashboardScreen(
             item {
                 ScanButton(
                     isLoading = uiState.isLoading,
-                    onClick = { viewModel.scanDevice() }
-                )
-            }
-
-            item {
-                Text(
-                    text = "Top Intrusive Apps",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color.White
-                )
-            }
-
-            // Show only the top 4 apps (first 3 unlocked, 4th locked)
-            val displayThreats = uiState.topThreats.take(4)
-            itemsIndexed(displayThreats) { index, app ->
-                if (index < 3) {
-                    // Display regular (unlocked) apps
-                    val icon = try {
-                        packageManager.getApplicationIcon(app.packageName) // Correctly accessing packageManager
-                    } catch (e: Exception) {
-                        null
+                    onClick = {
+                        val activity = context as? Activity
+                        if (activity != null) {
+                            AdMobManager.showInterstitial(activity) {
+                                viewModel.scanDevice()
+                            }
+                        } else {
+                            viewModel.scanDevice()
+                        }
                     }
+                )
+            }
 
-                    ThreatCard(
-                        appName = app.appName,
-                        summary = app.riskSummary,
-                        riskLevel = app.riskLevel,
-                        icon = icon
+            // Unscanned state: Show banner below scan button
+            if (!uiState.hasScanned) {
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    BannerAdView()
+                }
+            } else {
+                item {
+                    Text(
+                        text = "Top Intrusive Apps",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White
                     )
-                } else {
-                    // Show the 4th app as locked
-                    LockedAppCard(app = app, onClick = { onLockedAppClick(app) })
+                }
+
+                // Dynamically show unlocked apps + 1 locked app
+                val unlockedCount = uiState.unlockedThreatsCount
+                val totalThreatsToShow = minOf(unlockedCount + 1, uiState.topThreats.size)
+                val displayThreats = uiState.topThreats.take(totalThreatsToShow)
+
+                itemsIndexed(displayThreats) { index, app ->
+                    if (index < unlockedCount) {
+                        // Display regular (unlocked) apps
+                        val icon = try {
+                            packageManager.getApplicationIcon(app.packageName)
+                        } catch (e: Exception) {
+                            null
+                        }
+
+                        ThreatCard(
+                            appName = app.appName,
+                            summary = app.riskSummary,
+                            riskLevel = app.riskLevel,
+                            icon = icon
+                        )
+                    } else {
+                        // Show the next app as locked
+                        LockedAppCard(app = app, onClick = { onLockedAppClick(app) })
+                    }
+                }
+
+                // Scanned state: Show banner ad right below the locked app
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    BannerAdView()
                 }
             }
 

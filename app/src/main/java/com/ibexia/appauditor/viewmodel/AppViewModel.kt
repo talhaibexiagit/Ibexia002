@@ -266,9 +266,16 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 deviceScore = result.first,
                 overallRisk = getOverallRiskFromScore(result.first),
                 topThreats = result.second.sortedByDescending { it.riskLevel.ordinal },
-                allApps = result.second.sortedByDescending { it.riskLevel.ordinal }
+                allApps = result.second.sortedByDescending { it.riskLevel.ordinal },
+                unlockedThreatsCount = _uiState.value.unlockedThreatsCount
             )
         }
+    }
+
+    fun unlockOneMoreApp() {
+        _uiState.value = _uiState.value.copy(
+            unlockedThreatsCount = _uiState.value.unlockedThreatsCount + 1
+        )
     }
 
     private fun analyzeApps(): Pair<Int, List<AppInfo>> {

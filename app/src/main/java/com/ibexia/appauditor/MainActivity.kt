@@ -33,6 +33,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import com.ibexia.appauditor.ads.AdMobManager
 import com.ibexia.appauditor.ui.NavGraph
 import com.ibexia.appauditor.ui.theme.AppAuditorTheme
 import com.ibexia.appauditor.viewmodel.AppViewModel
@@ -43,6 +44,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize Google Mobile Ads SDK (Zero-Risk Sandboxing mode)
+        AdMobManager.initialize(this)
 
         setContent {
             AppAuditorTheme {

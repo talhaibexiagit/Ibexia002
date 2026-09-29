@@ -76,7 +76,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.ads.mobile.sdk)
+    implementation(libs.play.services.ads)
 
     implementation("androidx.compose.ui:ui:1.1.0")
     implementation("androidx.compose.material:material:1.1.0")

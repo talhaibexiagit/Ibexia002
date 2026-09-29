@@ -86,6 +86,10 @@ fun NavGraph(viewModel: AppViewModel) {
                 onUpgradeClick = {
                     // Handle the "Upgrade Now" action (Google Play Billing integration)
                 },
+                onUnlockAppClick = {
+                    viewModel.unlockOneMoreApp()
+                    navController.popBackStack()
+                },
                 onPremiumClick = {
                     // Navigate to Premium Dashboard Screen
                     navController.navigate("premium_dashboard")

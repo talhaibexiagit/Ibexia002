@@ -6,5 +6,6 @@ data class ScanUiState(
     val deviceScore: Int = 0,
     val overallRisk: RiskLevel = RiskLevel.LOW,
     val topThreats: List<AppInfo> = emptyList(),
-    val allApps: List<AppInfo> = emptyList()
+    val allApps: List<AppInfo> = emptyList(),
+    val unlockedThreatsCount: Int = 3
 )
