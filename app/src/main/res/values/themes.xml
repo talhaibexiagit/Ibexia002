@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.AppAuditor" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.AppAuditor"
+        parent="android:Theme.Material.Light.NoActionBar">
+
+        <item name="android:windowBackground">#032B3A</item>
+
+    </style>
+
 </resources>
+    <!--Splash white screen issue resolved in the above code-->
+
+
+<!--White splash screen code-->
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<resources>-->
+
+<!--    <style name="Theme.AppAuditor" parent="android:Theme.Material.Light.NoActionBar" />-->
+<!--</resources>-->

@@ -149,6 +149,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -379,9 +380,10 @@ fun DashboardScreen(
                 )
             }
 
-            // Show apps in topThreats, at least 4 apps will be displayed
-            items(uiState.topThreats) { app ->
-                if (uiState.topThreats.indexOf(app) < 3) {
+            // Show only the top 4 apps (first 3 unlocked, 4th locked)
+            val displayThreats = uiState.topThreats.take(4)
+            itemsIndexed(displayThreats) { index, app ->
+                if (index < 3) {
                     // Display regular (unlocked) apps
                     val icon = try {
                         packageManager.getApplicationIcon(app.packageName) // Correctly accessing packageManager
@@ -395,7 +397,7 @@ fun DashboardScreen(
                         riskLevel = app.riskLevel,
                         icon = icon
                     )
-                } else if (uiState.topThreats.indexOf(app) == 3) {
+                } else {
                     // Show the 4th app as locked
                     LockedAppCard(app = app, onClick = { onLockedAppClick(app) })
                 }
