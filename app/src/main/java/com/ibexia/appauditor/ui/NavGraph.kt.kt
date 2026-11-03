@@ -25,6 +25,10 @@ fun NavGraph(viewModel: AppViewModel) {
                 onLockedAppClick = { app ->
                     navController.navigate("paywall/${app.packageName}")
                 },
+                onUpgradeClick = {
+                    viewModel.setPremium(true)
+                    navController.navigate("premium_dashboard")
+                },
                 onFixNowClick = { packageName ->
                     navController.navigate("revoke_screen/$packageName")
                 }
@@ -35,6 +39,9 @@ fun NavGraph(viewModel: AppViewModel) {
             PaywallScreen(
                 onUpgradeClick = {
                     viewModel.setPremium(true)
+                    navController.navigate("premium_dashboard") {
+                        popUpTo("dashboard") { inclusive = false }
+                    }
                 },
                 onUnlockAppClick = {
                     viewModel.unlockOneMoreApp()

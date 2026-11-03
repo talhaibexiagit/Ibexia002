@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -112,6 +113,7 @@ fun ExpandableThreatCard(
     app: AppInfo,
     icon: Drawable?,
     isExpandable: Boolean = true,
+    onCardClick: (() -> Unit)? = null,
     onFixNowClick: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -130,6 +132,8 @@ fun ExpandableThreatCard(
             .then(
                 if (isExpandable) {
                     Modifier.clickable { expanded = !expanded }
+                } else if (onCardClick != null) {
+                    Modifier.clickable { onCardClick() }
                 } else {
                     Modifier
                 }
@@ -186,6 +190,13 @@ fun ExpandableThreatCard(
                         imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                         contentDescription = if (expanded) "Collapse" else "Expand",
                         tint = Color.White
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = "Upgrade Required",
+                        tint = Color(0xFFFFB74D),
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
