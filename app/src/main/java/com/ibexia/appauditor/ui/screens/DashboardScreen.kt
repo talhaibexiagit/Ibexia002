@@ -409,9 +409,7 @@ fun DashboardScreen(
                 confirmButton = {
                     Button(
                         onClick = {
-                            showUpgradeDialog = false
-                            pendingUpgradeApp = null
-                            onUpgradeClick()
+                            // Display button only for now: No action performed when pressed
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800)),
                         shape = RoundedCornerShape(50)

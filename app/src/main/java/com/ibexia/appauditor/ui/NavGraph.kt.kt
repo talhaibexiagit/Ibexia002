@@ -26,8 +26,7 @@ fun NavGraph(viewModel: AppViewModel) {
                     navController.navigate("paywall/${app.packageName}")
                 },
                 onUpgradeClick = {
-                    viewModel.setPremium(true)
-                    navController.navigate("premium_dashboard")
+                    // Display button only for now: No action performed
                 },
                 onFixNowClick = { packageName ->
                     navController.navigate("revoke_screen/$packageName")
@@ -38,10 +37,7 @@ fun NavGraph(viewModel: AppViewModel) {
             val packageName = backStackEntry.arguments?.getString("packageName")
             PaywallScreen(
                 onUpgradeClick = {
-                    viewModel.setPremium(true)
-                    navController.navigate("premium_dashboard") {
-                        popUpTo("dashboard") { inclusive = false }
-                    }
+                    // Display button only for now: No action performed
                 },
                 onUnlockAppClick = {
                     viewModel.unlockOneMoreApp()
