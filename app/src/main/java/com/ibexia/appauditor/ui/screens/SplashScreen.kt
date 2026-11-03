@@ -95,7 +95,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
+import com.ibexia.appauditor.R
 
 @Composable
 fun SplashScreen(navController: NavController) {
@@ -120,18 +123,12 @@ fun SplashScreen(navController: NavController) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "🛡️",
-                style = MaterialTheme.typography.displayLarge,
-                color = Color.White
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Quollium Privacy Auditor",
-                style = MaterialTheme.typography.headlineSmall,
-                color = Color.White
+            Image(
+                painter = painterResource(id = R.drawable.privasei_full_logo),
+                contentDescription = "Privasei Logo",
+                modifier = Modifier
+                    .fillMaxWidth(0.55f)
+                    .wrapContentHeight()
             )
 
             Spacer(modifier = Modifier.height(12.dp))

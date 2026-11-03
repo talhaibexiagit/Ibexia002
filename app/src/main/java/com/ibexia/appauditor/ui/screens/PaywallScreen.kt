@@ -182,7 +182,7 @@ fun PaywallScreen(
     ) {
         // Headline Section
         Text(
-            text = "Take Back Your Privacy with Quollium Premium",
+            text = "Take Back Your Privacy with Privasei Premium",
             style = MaterialTheme.typography.headlineSmall,
             color = Color.White,
             modifier = Modifier.padding(bottom = 24.dp) // Reduced padding

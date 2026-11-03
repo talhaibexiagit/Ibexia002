@@ -7,5 +7,9 @@ data class ScanUiState(
     val overallRisk: RiskLevel = RiskLevel.LOW,
     val topThreats: List<AppInfo> = emptyList(),
     val allApps: List<AppInfo> = emptyList(),
-    val unlockedThreatsCount: Int = 3
-)
+    val unlockedThreatsCount: Int = 3,
+    val isPremium: Boolean = false
+) {
+    val isFreemium: Boolean
+        get() = !isPremium
+}
