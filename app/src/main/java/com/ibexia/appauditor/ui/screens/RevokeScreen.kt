@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import com.ibexia.appauditor.viewmodel.AppViewModel
 import com.ibexia.appauditor.model.AppInfo
 import com.ibexia.appauditor.model.RiskLevel
+
 @Composable
 fun RevokeScreen(packageName: String, viewModel: AppViewModel) {
     val uiState = viewModel.uiState.collectAsState().value
@@ -95,12 +96,29 @@ fun RevokeScreen(packageName: String, viewModel: AppViewModel) {
                 )
             }
 
-            // Show only critical/high permissions
-            items(criticalPermissions) { permission ->
-                PermissionItem(permission = permission, onRevokeClick = {
-                    // Revoke permission when button is clicked
-                    viewModel.revokePermission(packageName)
-                })
+            if (criticalPermissions.isEmpty()) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF0A4155))
+                    ) {
+                        Text(
+                            text = "No high-risk permissions found. All permissions are safe.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFFD0E4EA),
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+            } else {
+                // Show only critical/high permissions
+                items(criticalPermissions) { permission ->
+                    PermissionItem(permission = permission, onRevokeClick = {
+                        // Revoke permission when button is clicked
+                        viewModel.revokePermission(packageName)
+                    })
+                }
             }
 
             item {
@@ -142,7 +160,6 @@ fun PermissionItem(permission: String, onRevokeClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-         //   .clickable { /* Handle click if needed */ },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF0A4155))
     ) {

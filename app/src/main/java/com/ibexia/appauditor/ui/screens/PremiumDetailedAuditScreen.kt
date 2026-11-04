@@ -3,6 +3,7 @@ package com.ibexia.appauditor.ui.screens
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Refresh
@@ -262,26 +264,59 @@ fun AppListItem(app: AppInfo, icon: Drawable?, onClick: () -> Unit) {
 
             if (expanded) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Column {
-                    Text(
-                        text = "Why this app is ${app.riskLevel}:",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White
-                    )
-                    Text(
-                        text = "The app has access to critical permission of ${app.riskSummary}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFD0E4EA)
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = { onClick() },
-                    modifier = Modifier.fillMaxWidth().height(55.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
-                    shape = RoundedCornerShape(50)
-                ) {
-                    Text(text = "Fix Now", style = MaterialTheme.typography.titleMedium, color = Color.White)
+                if (app.riskLevel == RiskLevel.CRITICAL || app.riskLevel == RiskLevel.HIGH) {
+                    Column {
+                        Text(
+                            text = "Why this app is ${app.riskLevel}:",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White
+                        )
+                        Text(
+                            text = "The app has access to critical permission of ${app.riskSummary}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFFD0E4EA)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = { onClick() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(55.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+                        shape = RoundedCornerShape(50)
+                    ) {
+                        Text(
+                            text = "Fix Now",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White
+                        )
+                    }
+                } else {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFF4CAF50).copy(alpha = 0.15f),
+                        border = BorderStroke(1.dp, Color(0xFF4CAF50).copy(alpha = 0.4f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = Color(0xFF4CAF50),
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = "This app only uses basic system features (Bluetooth, Wi-Fi, etc.). No action required.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color(0xFFD0E4EA)
+                            )
+                        }
+                    }
                 }
             }
         }

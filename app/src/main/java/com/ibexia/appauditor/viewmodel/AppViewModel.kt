@@ -1,6 +1,7 @@
 package com.ibexia.appauditor.viewmodel
 
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo as AndroidAppInfo
 import android.content.pm.PackageManager
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.HashSet
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -25,8 +27,35 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(ScanUiState())
     val uiState: StateFlow<ScanUiState> = _uiState.asStateFlow()
 
-    // Tracks the active freemium threats batch so that resolved threats dynamically reduce count (3 -> 2 -> 1 -> 0)
-    private val freemiumThreatPackageNames = mutableSetOf<String>()
+    private val prefs by lazy {
+        getApplication<Application>().getSharedPreferences("privasei_prefs", Context.MODE_PRIVATE)
+    }
+
+    private val KEY_INITIAL_FREE_PACKAGES = "initial_free_quota_packages"
+    private val KEY_UNLOCKED_AD_PACKAGES = "unlocked_ad_packages"
+
+    // Persistent tracking of freemium package allocations
+    private val initialFreeQuotaPackageNames = mutableSetOf<String>()
+    private val unlockedAdPackageNames = mutableSetOf<String>()
+
+    init {
+        val savedFree = prefs.getStringSet(KEY_INITIAL_FREE_PACKAGES, null)
+        if (!savedFree.isNullOrEmpty()) {
+            initialFreeQuotaPackageNames.addAll(savedFree)
+        }
+        val savedAd = prefs.getStringSet(KEY_UNLOCKED_AD_PACKAGES, null)
+        if (!savedAd.isNullOrEmpty()) {
+            unlockedAdPackageNames.addAll(savedAd)
+        }
+    }
+
+    fun isFreeTierApp(packageName: String): Boolean {
+        return packageName in initialFreeQuotaPackageNames
+    }
+
+    fun getFreeTierAvailableCount(): Int {
+        return _uiState.value.topThreats.count { it.packageName in initialFreeQuotaPackageNames }
+    }
 
     val permissionRiskMap = mapOf(
         // CRITICAL
@@ -70,7 +99,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun resetScanState() {
-        freemiumThreatPackageNames.clear()
         _uiState.value = _uiState.value.copy(
             isLoading = false,
             hasScanned = false,
@@ -99,20 +127,22 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 it.riskLevel == RiskLevel.CRITICAL || it.riskLevel == RiskLevel.HIGH
             }
 
-            // Task 2: Freemium Dynamic Rescan List Reduction
+            // Freemium Dynamic Rescan List & Quota Persistence Handling
             val topThreatsToDisplay = if (_uiState.value.isPremium) {
                 actualThreats
             } else {
-                if (freemiumThreatPackageNames.isEmpty()) {
-                    // First scan: initialize with top 3 threats
+                if (initialFreeQuotaPackageNames.isEmpty()) {
+                    // First scan: initialize with top 3 threats and persist
                     val initialTop3 = actualThreats.take(3)
-                    freemiumThreatPackageNames.clear()
-                    freemiumThreatPackageNames.addAll(initialTop3.map { it.packageName })
-                    actualThreats.filter { it.packageName in freemiumThreatPackageNames }
-                } else {
-                    // Rescan: retain only unresolved threats from the freemium batch
-                    actualThreats.filter { it.packageName in freemiumThreatPackageNames }
+                    initialFreeQuotaPackageNames.addAll(initialTop3.map { it.packageName })
+                    prefs.edit().putStringSet(KEY_INITIAL_FREE_PACKAGES, HashSet(initialFreeQuotaPackageNames)).apply()
                 }
+
+                // Filter active threats: remaining free threats first, then ad-unlocked threats
+                val remainingFreeThreats = actualThreats.filter { it.packageName in initialFreeQuotaPackageNames }
+                val additionalUnlockedThreats = actualThreats.filter { it.packageName in unlockedAdPackageNames }
+
+                (remainingFreeThreats + additionalUnlockedThreats).distinctBy { it.packageName }
             }
 
             _uiState.value = _uiState.value.copy(
@@ -127,20 +157,27 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun unlockOneMoreApp() {
-        val allThreats = _uiState.value.allApps.filter {
+        val actualThreats = _uiState.value.allApps.filter {
             it.riskLevel == RiskLevel.CRITICAL || it.riskLevel == RiskLevel.HIGH
         }
-        val nextLockedApp = allThreats.firstOrNull { it.packageName !in freemiumThreatPackageNames }
+        val nextLockedApp = actualThreats.firstOrNull {
+            it.packageName !in initialFreeQuotaPackageNames && it.packageName !in unlockedAdPackageNames
+        }
         if (nextLockedApp != null) {
-            freemiumThreatPackageNames.add(nextLockedApp.packageName)
-            val updatedTopThreats = allThreats.filter { it.packageName in freemiumThreatPackageNames }
+            unlockedAdPackageNames.add(nextLockedApp.packageName)
+            prefs.edit().putStringSet(KEY_UNLOCKED_AD_PACKAGES, HashSet(unlockedAdPackageNames)).apply()
+
+            val remainingFreeThreats = actualThreats.filter { it.packageName in initialFreeQuotaPackageNames }
+            val additionalUnlockedThreats = actualThreats.filter { it.packageName in unlockedAdPackageNames }
+            val updatedTopThreats = (remainingFreeThreats + additionalUnlockedThreats).distinctBy { it.packageName }
+
             _uiState.value = _uiState.value.copy(
-                unlockedThreatsCount = _uiState.value.unlockedThreatsCount + 1,
+                unlockedThreatsCount = unlockedAdPackageNames.size,
                 topThreats = updatedTopThreats
             )
         } else {
             _uiState.value = _uiState.value.copy(
-                unlockedThreatsCount = _uiState.value.unlockedThreatsCount + 1
+                unlockedThreatsCount = unlockedAdPackageNames.size
             )
         }
     }

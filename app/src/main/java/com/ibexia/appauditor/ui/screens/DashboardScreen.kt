@@ -209,7 +209,7 @@ fun DashboardScreen(
                         )
 
                         if (uiState.isFreemium) {
-                            val freeTierAvailable = minOf(uiState.topThreats.size, 3)
+                            val freeTierAvailable = viewModel.getFreeTierAvailableCount()
                             Surface(
                                 shape = RoundedCornerShape(50),
                                 color = Color(0xFF0A4155),
@@ -250,15 +250,15 @@ fun DashboardScreen(
                             null
                         }
 
-                        // Freemium users can expand/click only the top 3 displayed apps; Premium users can expand all
-                        val isExpandable = if (uiState.isPremium) true else index < 3
+                        val isFreeApp = viewModel.isFreeTierApp(app.packageName)
+                        val isExpandable = if (uiState.isPremium) true else isFreeApp
 
                         ExpandableThreatCard(
                             app = app,
                             icon = icon,
                             isExpandable = isExpandable,
                             onCardClick = {
-                                if (uiState.isFreemium && index >= 3) {
+                                if (uiState.isFreemium && !isFreeApp) {
                                     pendingUpgradeApp = app
                                     showUpgradeDialog = true
                                 }
