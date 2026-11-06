@@ -172,11 +172,8 @@ fun PremiumDashboardScreen(viewModel: AppViewModel, onFixNowClick: (String) -> U
                 )
             }
 
-            // Strictly sorted: Critical first, then High, then Moderate, then Low
-            val sortedApps = uiState.allApps.sortedWith(
-                compareByDescending<AppInfo> { it.riskLevel.ordinal }
-                    .thenBy { it.appName.lowercase() }
-            )
+            // Strictly sorted by risk priority: Critical first, then High, then Moderate, then Low
+            val sortedApps = uiState.allApps.sortedByDescending { it.riskLevel.ordinal }
 
             // Display all apps strictly sorted by risk level
             itemsIndexed(sortedApps) { index, app ->

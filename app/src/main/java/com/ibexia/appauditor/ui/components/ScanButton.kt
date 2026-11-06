@@ -47,7 +47,7 @@ fun ScanButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFFFF4D5A),
             contentColor = Color.White,
-            disabledContainerColor = Color(0x66FF4D5A),
+            disabledContainerColor = Color(0xFFFF4D5A),
             disabledContentColor = Color.White
         ),
         modifier = Modifier

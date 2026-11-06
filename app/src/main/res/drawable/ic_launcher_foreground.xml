@@ -4,38 +4,45 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Shackle Left (White) -->
-    <path
-        android:pathData="M40,38 V28 C40,20 46,14 54,14"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="5"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000" />
-    <!-- Shackle Right (Purple) -->
-    <path
-        android:pathData="M54,14 C62,14 68,20 68,28 V34"
-        android:strokeColor="#A855F7"
-        android:strokeWidth="5"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000" />
-    <!-- Left Shield Edge (White) -->
-    <path
-        android:pathData="M54,40 L32,48 L32,66 C32,78 44,88 54,92"
-        android:strokeColor="#FFFFFF"
-        android:strokeWidth="5"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:fillColor="#00000000" />
-    <!-- Right Shield Edge (Vibrant Purple) -->
-    <path
-        android:pathData="M54,40 L76,48 L76,66 C76,78 64,88 54,92"
-        android:strokeColor="#A855F7"
-        android:strokeWidth="5"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:fillColor="#00000000" />
-    <!-- Center Keyhole (Vibrant Purple) -->
-    <path
-        android:pathData="M54,56 C51.2,56 49,58.2 49,61 C49,63 50.2,64.7 52,65.5 L51,73 L57,73 L56,65.5 C57.8,64.7 59,63 59,61 C59,58.2 56.8,56 54,56 Z"
-        android:fillColor="#A855F7" />
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="0.80"
+        android:scaleY="0.80"
+        android:translateY="0.8">
+        <!-- Shackle Left (White) -->
+        <path
+            android:pathData="M40,38 V28 C40,20 46,14 54,14"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:fillColor="#00000000" />
+        <!-- Shackle Right (Purple) -->
+        <path
+            android:pathData="M54,14 C62,14 68,20 68,28 V34"
+            android:strokeColor="#A855F7"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:fillColor="#00000000" />
+        <!-- Left Shield Edge (White) -->
+        <path
+            android:pathData="M54,40 L32,48 L32,66 C32,78 44,88 54,92"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:fillColor="#00000000" />
+        <!-- Right Shield Edge (Vibrant Purple) -->
+        <path
+            android:pathData="M54,40 L76,48 L76,66 C76,78 64,88 54,92"
+            android:strokeColor="#A855F7"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:fillColor="#00000000" />
+        <!-- Center Keyhole (Vibrant Purple) -->
+        <path
+            android:pathData="M54,56 C51.2,56 49,58.2 49,61 C49,63 50.2,64.7 52,65.5 L51,73 L57,73 L56,65.5 C57.8,64.7 59,63 59,61 C59,58.2 56.8,56 54,56 Z"
+            android:fillColor="#A855F7" />
+    </group>
 </vector>

@@ -273,7 +273,7 @@ fun PaywallScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
         // Bottom Banner Ad
-        BannerAdView()
+        BannerAdView(screenKey = "paywall")
     }
 }
 

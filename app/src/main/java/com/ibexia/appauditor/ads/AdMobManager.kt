@@ -3,8 +3,11 @@ package com.ibexia.appauditor.ads
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import android.view.ViewGroup
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
@@ -22,6 +25,9 @@ object AdMobManager {
 
     private var rewardedAd: RewardedAd? = null
     private var isRewardedLoading: Boolean = false
+
+    private var dashboardBannerAdView: AdView? = null
+    private var paywallBannerAdView: AdView? = null
 
     var isInitialized: Boolean = false
         private set
@@ -41,7 +47,42 @@ object AdMobManager {
             // Preload ads in the background
             loadInterstitial(context.applicationContext)
             loadRewarded(context.applicationContext)
+            preloadDashboardBanner(context.applicationContext)
         }
+    }
+
+    fun preloadDashboardBanner(context: Context) {
+        getOrCreateDashboardBanner(context)
+    }
+
+    fun getOrCreateDashboardBanner(context: Context): AdView {
+        val existing = dashboardBannerAdView
+        if (existing != null) {
+            (existing.parent as? ViewGroup)?.removeView(existing)
+            return existing
+        }
+        val newAdView = AdView(context).apply {
+            setAdSize(AdSize.BANNER)
+            adUnitId = AdConfig.BANNER_AD_UNIT_ID
+            loadAd(AdRequest.Builder().build())
+        }
+        dashboardBannerAdView = newAdView
+        return newAdView
+    }
+
+    fun getOrCreatePaywallBanner(context: Context): AdView {
+        val existing = paywallBannerAdView
+        if (existing != null) {
+            (existing.parent as? ViewGroup)?.removeView(existing)
+            return existing
+        }
+        val newAdView = AdView(context).apply {
+            setAdSize(AdSize.BANNER)
+            adUnitId = AdConfig.BANNER_AD_UNIT_ID
+            loadAd(AdRequest.Builder().build())
+        }
+        paywallBannerAdView = newAdView
+        return newAdView
     }
 
     fun loadInterstitial(context: Context) {

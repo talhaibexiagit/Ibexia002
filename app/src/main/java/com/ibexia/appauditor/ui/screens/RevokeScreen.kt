@@ -27,10 +27,42 @@ fun RevokeScreen(packageName: String, viewModel: AppViewModel) {
         return
     }
 
+    // Group-level permission consolidation: Android Settings groups runtime permissions
+    // into single toggles (Location, SMS, Storage, Contacts, Phone). Display only one entry per group to prevent redundancy.
+    // Sorted by priority: CRITICAL permissions at top, HIGH risk permissions below.
+    val phoneGroup = listOf(
+        "android.permission.READ_PHONE_STATE",
+        "android.permission.READ_CALL_LOG",
+        "android.permission.CALL_PHONE"
+    )
+    val storageGroup = listOf(
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO"
+    )
     val criticalPermissions = appInfo.permissions.filter {
         // Filter critical/high permissions
         viewModel.permissionRiskMap[it] == RiskLevel.CRITICAL || viewModel.permissionRiskMap[it] == RiskLevel.HIGH
-    }
+    }.filterNot { permission ->
+        // If app has ACCESS_FINE_LOCATION, omit ACCESS_COARSE_LOCATION (both controlled by the same Location toggle)
+        (permission == "android.permission.ACCESS_COARSE_LOCATION" && "android.permission.ACCESS_FINE_LOCATION" in appInfo.permissions) ||
+        // If app has READ_SMS, omit SEND_SMS (both controlled by the same SMS toggle)
+        (permission == "android.permission.SEND_SMS" && "android.permission.READ_SMS" in appInfo.permissions) ||
+        // Consolidate Storage permissions to a single entry matching "Storage / Photos & videos" toggle in Settings
+        (permission in storageGroup && permission != storageGroup.firstOrNull { it in appInfo.permissions }) ||
+        // If app has READ_CONTACTS, omit WRITE_CONTACTS (both controlled by the same Contacts and accounts toggle)
+        (permission == "android.permission.WRITE_CONTACTS" && "android.permission.READ_CONTACTS" in appInfo.permissions) ||
+        // If app has READ_CALENDAR, omit WRITE_CALENDAR (both controlled by the same Calendar toggle)
+        (permission == "android.permission.WRITE_CALENDAR" && "android.permission.READ_CALENDAR" in appInfo.permissions) ||
+        // Consolidate Phone / Calls permissions to a single entry matching "Phone" toggle in Settings
+        (permission in phoneGroup && permission != phoneGroup.firstOrNull { it in appInfo.permissions }) ||
+        // GET_ACCOUNTS is a normal install-time permission on Android 8.0+ (API 26+) and cannot be revoked in Android Settings
+        permission == "android.permission.GET_ACCOUNTS" ||
+        // SYSTEM_ALERT_WINDOW is managed under "Special app access / Appear on top", not standard App Permissions
+        permission == "android.permission.SYSTEM_ALERT_WINDOW"
+    }.sortedByDescending { viewModel.permissionRiskMap[it]?.ordinal ?: 0 }
 
     Box(
         modifier = Modifier
@@ -134,19 +166,27 @@ fun PermissionItem(permission: String, onRevokeClick: () -> Unit) {
     val permissionName = getPermissionDisplayName(permission)
 
     val permissionRiskLevel = when (permission) {
+        // CRITICAL PERMISSIONS (Camera, Mic, SMS, Contacts, Storage)
         "android.permission.CAMERA" -> RiskLevel.CRITICAL
         "android.permission.RECORD_AUDIO" -> RiskLevel.CRITICAL
-        "android.permission.ACCESS_FINE_LOCATION" -> RiskLevel.CRITICAL
         "android.permission.READ_SMS" -> RiskLevel.CRITICAL
         "android.permission.SEND_SMS" -> RiskLevel.CRITICAL
-        "android.permission.READ_CALL_LOG" -> RiskLevel.CRITICAL
         "android.permission.READ_CONTACTS" -> RiskLevel.CRITICAL
+        "android.permission.WRITE_CONTACTS" -> RiskLevel.CRITICAL
+        "android.permission.READ_EXTERNAL_STORAGE" -> RiskLevel.CRITICAL
+        "android.permission.WRITE_EXTERNAL_STORAGE" -> RiskLevel.CRITICAL
+        "android.permission.READ_MEDIA_IMAGES" -> RiskLevel.CRITICAL
+        "android.permission.READ_MEDIA_VIDEO" -> RiskLevel.CRITICAL
+        "android.permission.READ_MEDIA_AUDIO" -> RiskLevel.CRITICAL
+
+        // HIGH RISK PERMISSIONS (Calendar, Phone/Calls, Location)
+        "android.permission.ACCESS_FINE_LOCATION" -> RiskLevel.HIGH
         "android.permission.ACCESS_COARSE_LOCATION" -> RiskLevel.HIGH
-        "android.permission.READ_EXTERNAL_STORAGE" -> RiskLevel.HIGH
-        "android.permission.WRITE_EXTERNAL_STORAGE" -> RiskLevel.HIGH
-        "android.permission.GET_ACCOUNTS" -> RiskLevel.HIGH
         "android.permission.READ_CALENDAR" -> RiskLevel.HIGH
-        "android.permission.SYSTEM_ALERT_WINDOW" -> RiskLevel.HIGH
+        "android.permission.WRITE_CALENDAR" -> RiskLevel.HIGH
+        "android.permission.READ_PHONE_STATE" -> RiskLevel.HIGH
+        "android.permission.READ_CALL_LOG" -> RiskLevel.HIGH
+        "android.permission.CALL_PHONE" -> RiskLevel.HIGH
         else -> RiskLevel.LOW
     }
 
@@ -179,7 +219,11 @@ fun PermissionItem(permission: String, onRevokeClick: () -> Unit) {
                 Text(
                     text = riskText,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFFFFB74D)
+                    color = when (permissionRiskLevel) {
+                        RiskLevel.CRITICAL -> Color(0xFFFF4D5A) // Red for Critical
+                        RiskLevel.HIGH -> Color(0xFFFFB74D) // Yellow/Orange for High
+                        else -> Color(0xFF4CAF50)
+                    }
                 )
             }
 
@@ -206,17 +250,31 @@ fun getPermissionDisplayName(permission: String): String {
     return when (permission) {
         "android.permission.CAMERA" -> "Camera Access"
         "android.permission.RECORD_AUDIO" -> "Microphone Access"
+        // Location group (Single toggle in Android Settings)
         "android.permission.ACCESS_FINE_LOCATION" -> "Location Access"
+        "android.permission.ACCESS_COARSE_LOCATION" -> "Location Access"
+        // SMS group (Single toggle in Android Settings)
         "android.permission.READ_SMS" -> "SMS Access"
-        "android.permission.SEND_SMS" -> "Send SMS"
-        "android.permission.READ_CALL_LOG" -> "Call Log Access"
-        "android.permission.READ_CONTACTS" -> "Contacts Access"
-        "android.permission.ACCESS_COARSE_LOCATION" -> "Coarse Location Access"
-        "android.permission.READ_EXTERNAL_STORAGE" -> "External Storage Access"
-        "android.permission.WRITE_EXTERNAL_STORAGE" -> "External Storage Write Access"
-        "android.permission.GET_ACCOUNTS" -> "Account Access"
+        "android.permission.SEND_SMS" -> "SMS Access"
+        // Phone group (Matches "Phone" toggle in Android Settings)
+        "android.permission.READ_PHONE_STATE" -> "Phone Access"
+        "android.permission.READ_CALL_LOG" -> "Phone Access"
+        "android.permission.CALL_PHONE" -> "Phone Access"
+        // Contacts & Accounts group (Matches "Contacts and accounts" toggle in Android Settings)
+        "android.permission.READ_CONTACTS" -> "Contacts and accounts"
+        "android.permission.WRITE_CONTACTS" -> "Contacts and accounts"
+        // Original: "android.permission.GET_ACCOUNTS" -> "Account Access"
+        "android.permission.GET_ACCOUNTS" -> "Contacts and accounts"
+        // Storage & Media group (Universal: Matches "Photos and videos" in Android 13+ and "Storage" in older Android)
+        "android.permission.READ_EXTERNAL_STORAGE" -> "Photos, videos & storage"
+        "android.permission.WRITE_EXTERNAL_STORAGE" -> "Photos, videos & storage"
+        "android.permission.READ_MEDIA_IMAGES" -> "Photos, videos & storage"
+        "android.permission.READ_MEDIA_VIDEO" -> "Photos, videos & storage"
+        "android.permission.READ_MEDIA_AUDIO" -> "Photos, videos & storage"
         "android.permission.READ_CALENDAR" -> "Calendar Access"
-        "android.permission.SYSTEM_ALERT_WINDOW" -> "System Alert Window Access"
+        "android.permission.WRITE_CALENDAR" -> "Calendar Access"
+        // Original: "android.permission.SYSTEM_ALERT_WINDOW" -> "System Alert Window Access"
+        // Commented out: SYSTEM_ALERT_WINDOW is managed under "Special app access / Appear on top", not standard App Permissions.
         else -> permission.replace("android.permission.", "").replace("_", " ")
     }
 }
